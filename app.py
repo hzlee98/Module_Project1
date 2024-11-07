@@ -97,6 +97,7 @@ if st.session_state.image_url:
                        unsafe_allow_html=True
                       )
            
+           #db 연결
            with connect_to_db() as connection:
                 with connection.cursor() as cursor:
                     sql = "INSERT INTO images (keyword, image_url) VALUES (%s, %s)"
