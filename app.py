@@ -5,6 +5,7 @@ from io import BytesIO
 from PIL import Image
 import os
 import boto3
+import pymysql
 
 openai.api_key = st.secrets["api_key"]
 
@@ -15,6 +16,16 @@ s3 = boto3.client(
     aws_secret_access_key=st.secrets["aws_secret_access_key"],
     region_name=st.secrets["aws_region_name"]
 )
+
+def connect_to_db():
+    connection = pymysql.connect(
+        host=st.secrets["db_host"],
+        user=st.secrets["db_user"],
+        password=st.secrets["db_password"],
+        database=st.secrets["db_name"],
+        port=int(st.secrets["db_port"])
+    )
+    return connection
 
 st.title("GET /api Module Project1")
 if "image_url" not in st.session_state:
@@ -85,3 +96,11 @@ if st.session_state.image_url:
            st.markdown(f'<a href="{s3_url}" style="word-wrap: break-word; white-space: pre-wrap;">Download the image from S3</a>',
                        unsafe_allow_html=True
                       )
+           
+           with connect_to_db() as connection:
+                with connection.cursor() as cursor:
+                    sql = "INSERT INTO images (keyword, image_url) VALUES (%s, %s)"
+                    cursor.execute(sql, (user_input, s3_url))
+                    connection.commit()
+                    connection.close()
+                st.success("Image data saved to the database.")
