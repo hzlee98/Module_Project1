@@ -102,5 +102,4 @@ if st.session_state.image_url:
                     sql = "INSERT INTO images (keyword, image_url) VALUES (%s, %s)"
                     cursor.execute(sql, (user_input, s3_url))
                     connection.commit()
-                    connection.close()
                 st.success("Image data saved to the database.")
